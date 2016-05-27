@@ -3,6 +3,7 @@ package spark.jobserver
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, FunSpecLike, Matchers}
+import spark.jobserver.common.{CommonMessages, JobResultActor}
 
 
 object JobResultActorSpec {
@@ -12,7 +13,7 @@ object JobResultActorSpec {
 class JobResultActorSpec extends TestKit(JobResultActorSpec.system) with ImplicitSender
 with FunSpecLike with Matchers with BeforeAndAfter with BeforeAndAfterAll {
 
-  import spark.jobserver.CommonMessages._
+  import CommonMessages._
 
   override def afterAll() {
     ooyala.common.akka.AkkaTestUtils.shutdownAndWait(JobResultActorSpec.system)

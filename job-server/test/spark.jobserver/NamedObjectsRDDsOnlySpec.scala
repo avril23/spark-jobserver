@@ -6,6 +6,7 @@ import org.apache.spark.{ SparkContext, SparkConf }
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
 import org.scalatest.{ Matchers, FunSpecLike, FunSpec, BeforeAndAfterAll, BeforeAndAfter }
+import spark.jobserver.common.JobServerNamedObjects
 
 /**
  * please note that this test only uses RDDs as named objects, there exists another test class

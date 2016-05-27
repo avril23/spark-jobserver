@@ -6,8 +6,9 @@ import akka.testkit.TestKit
 import com.typesafe.config.{Config, ConfigFactory}
 import org.joda.time.DateTime
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, FunSpecLike, Matchers}
+import spark.jobserver.common.CommonMessages
 import spark.jobserver.context.DefaultSparkContextFactory
-import spark.jobserver.io.JobDAO
+import spark.jobserver.common.io.JobDAO
 
 /**
  * Provides a base Config for tests.  Override the vals to configure.  Mix into an object.

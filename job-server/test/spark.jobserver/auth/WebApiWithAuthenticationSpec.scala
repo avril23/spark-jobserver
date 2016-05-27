@@ -3,7 +3,8 @@ package spark.jobserver.auth
 import akka.actor.{ Actor, Props }
 import com.typesafe.config.{ ConfigFactory, ConfigValueFactory }
 import spark.jobserver._
-import spark.jobserver.io.{ JobInfo, JarInfo }
+import spark.jobserver.common.{JobInfoActor, CommonMessages}
+import spark.jobserver.common.io.{ JobInfo, JarInfo }
 import org.joda.time.DateTime
 import org.scalatest.{ Matchers, FunSpec, BeforeAndAfterAll }
 import spray.http.StatusCodes._

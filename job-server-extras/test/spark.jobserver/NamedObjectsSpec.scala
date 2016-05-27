@@ -8,6 +8,7 @@ import org.apache.spark.sql.types._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
 import org.scalatest.{ Matchers, FunSpecLike, FunSpec, BeforeAndAfterAll, BeforeAndAfter }
+import spark.jobserver.common.JobServerNamedObjects
 
 /**
  * this Spec is a more complex version of the same one in the job-server project,

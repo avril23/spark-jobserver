@@ -3,8 +3,8 @@ package spark.jobserver.context
 import com.typesafe.config.Config
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SQLContext
+import spark.jobserver.common.context.SparkContextFactory
 import spark.jobserver.{ContextLike, SparkSqlJob, SparkJobBase}
-import spark.jobserver.util.SparkJobUtils
 
 class SQLContextFactory extends SparkContextFactory {
   type C = SQLContext with ContextLike

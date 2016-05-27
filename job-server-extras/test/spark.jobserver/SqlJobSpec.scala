@@ -4,8 +4,9 @@ import akka.actor.Props
 import akka.testkit.{TestProbe, TestActorRef}
 import com.typesafe.config.{ConfigValueFactory, ConfigFactory}
 import org.apache.spark.sql.Row
+import spark.jobserver.common.CommonMessages
 import spark.jobserver.context.SQLContextFactory
-import spark.jobserver.io.{JobDAOActor, JobDAO}
+import spark.jobserver.common.io.{JobDAOActor, JobDAO}
 
 object SqlJobSpec extends JobSpecConfig {
   override val contextFactory = classOf[SQLContextFactory].getName

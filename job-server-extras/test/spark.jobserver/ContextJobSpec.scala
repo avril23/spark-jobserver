@@ -1,8 +1,9 @@
 package spark.jobserver
 
 import com.typesafe.config.ConfigFactory
+import spark.jobserver.common.CommonMessages
 import scala.collection.mutable
-import spark.jobserver.io.{JobDAO, JobDAOActor}
+import spark.jobserver.common.io.{JobDAO, JobDAOActor}
 
 /**
  * This is just to test that you cannot load a SqlJob into a normal job context.

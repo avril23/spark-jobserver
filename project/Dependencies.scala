@@ -30,9 +30,11 @@ object Dependencies {
     yammerDeps
   ) ++ yodaDeps
 
+  val hadoopVersion = sys.env.getOrElse("HADOOP_VERSION", "2.6.0")
+
   val mesosVersion = sys.env.getOrElse("MESOS_VERSION", "0.25.0-0.2.70.ubuntu1404")
 
-  val sparkVersion = sys.env.getOrElse("SPARK_VERSION", "1.6.0")
+  val sparkVersion = sys.env.getOrElse("SPARK_VERSION", "1.6.1")
   lazy val sparkDeps = Seq(
     "org.apache.spark" %% "spark-core" % sparkVersion % "provided" excludeAll(excludeNettyIo, excludeQQ),
     // Force netty version.  This avoids some Spark netty dependency problem.
@@ -65,6 +67,28 @@ object Dependencies {
 
   lazy val securityDeps = Seq(
      "org.apache.shiro" % "shiro-core" % "1.2.4"
+  )
+
+  lazy val json4sDeps = Seq(
+//    "org.json4s" % "json4s-core_2.10" % "3.2.7",
+//    "org.json4s" % "json4s-native_2.10" % "3.3.0",
+    "org.json4s" % "json4s-jackson_2.10" % "3.2.4",
+//      exclude("com.fasterxml.jackson.core", "jacks*/on-databind"),
+    "org.json4s" % "json4s-ext_2.10" % "3.2.4"
+  )
+
+  lazy val hadoopDeps = Seq(
+    "org.apache.hadoop" % "hadoop-mapreduce" % hadoopVersion,
+    "org.apache.hadoop" % "hadoop-client" % hadoopVersion exclude("javax.servlet", "servlet-api")
+  )
+
+  lazy val scalajDeps = Seq(
+    "org.scalaj" % "scalaj-http_2.10" % "2.3.0"
+  )
+
+  lazy val zeromqDeps = Seq(
+    "org.zeromq" % "jeromq" % "0.3.5"
+//    "org.zeromq" % "zeromq-scala-binding_2.10" % "0.0.7"
   )
 
   lazy val serverDeps = apiDeps ++ yodaDeps

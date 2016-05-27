@@ -3,6 +3,7 @@ package spark.jobserver.util
 import com.typesafe.config.ConfigFactory
 import org.apache.spark.SparkConf
 import org.scalatest.{Matchers, FunSpec}
+import spark.jobserver.common.utils.SparkJobUtils
 
 class SparkJobUtilsSpec extends FunSpec with Matchers {
   import collection.JavaConverters._

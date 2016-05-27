@@ -3,8 +3,9 @@ package spark.jobserver
 import akka.actor.{Props, ActorRef, ActorSystem}
 import akka.testkit.{TestKit, ImplicitSender}
 import org.scalatest.{FunSpecLike, BeforeAndAfter, BeforeAndAfterAll, Matchers}
+import spark.jobserver.common.{JobInfoActor, CommonMessages}
 
-import spark.jobserver.io.{JobDAOActor, JobDAO}
+import spark.jobserver.common.io.{JobDAOActor, JobDAO}
 
 object JobInfoActorSpec {
   val system = ActorSystem("test")

@@ -28,9 +28,9 @@ object JobServerBuild extends Build {
   )
 
   lazy val jobServer = Project(id = "job-server", base = file("job-server"),
-    settings = commonSettings ++ revolverSettings ++ Assembly.settings ++ Seq(
+    settings = commonSettings  ++ Assembly.settings ++ Seq(
       description  := "Spark as a Service: a RESTful job server for Apache Spark",
-      libraryDependencies ++= sparkDeps ++ slickDeps ++ securityDeps ++ coreTestDeps,
+      libraryDependencies ++= securityDeps ++ coreTestDeps ++ logbackDeps,
 
       // Automatically package the test jar when we run tests here
       // And always do a clean before package (package depends on clean) to clear out multiple versions
@@ -50,9 +50,9 @@ object JobServerBuild extends Build {
       // scala.reflect.internal.MissingRequirementError errors. (TODO)
       // TODO: Remove this once we upgrade to Spark 1.4 ... see resolution of SPARK-5281.
       // Also: note that fork won't work when VPN is on or other funny networking
-      fork in Test := true
+      fork in Test := false
       ) ++ publishSettings
-  ) dependsOn(akkaApp, jobServerApi)
+  ) dependsOn(jobServerApi, jobServerReceiver)
 
   lazy val jobServerTestJar = Project(id = "job-server-tests", base = file("job-server-tests"),
                                       settings = commonSettings ++ jobServerTestJarSettings
@@ -66,7 +66,23 @@ object JobServerBuild extends Build {
                                      base = file("job-server-extras"),
                                      settings = commonSettings ++ jobServerExtrasSettings
                                     ) dependsOn(jobServerApi,
+                                                jobServerCommon,
                                                 jobServer % "compile->compile; test->test")
+
+  lazy val jobServerSdk = Project(id = "job-server-sdk",
+                                  base = file("job-server-sdk"),
+                                  settings = commonSettings ++ jobServerSdkSettings
+                                ) dependsOn jobServerCommon
+
+  lazy val jobServerCommon = Project(id = "job-server-common",
+                                     base = file("job-server-common"),
+                                     settings = commonSettings ++ jobServerCommonSettings
+                                ) dependsOn (akkaApp, jobServerApi)
+
+  lazy val jobServerReceiver = Project(id = "job-server-receiver",
+    base = file("job-server-receiver"),
+    settings = commonSettings ++ jobServerReceiverSettings
+  ) dependsOn (jobServerCommon, akkaApp)
 
   // This meta-project aggregates all of the sub-projects and can be used to compile/test/style check
   // all of them with a single command.
@@ -74,7 +90,8 @@ object JobServerBuild extends Build {
   // NOTE: if we don't define a root project, SBT does it for us, but without our settings
   lazy val root = Project(id = "root", base = file("."),
                     settings = commonSettings ++ ourReleaseSettings ++ rootSettings ++ dockerSettings
-                  ).aggregate(jobServer, jobServerApi, jobServerTestJar, akkaApp, jobServerExtras).
+                  ).aggregate(jobServer, jobServerApi, jobServerTestJar, akkaApp, jobServerExtras,
+                              jobServerSdk, jobServerCommon, jobServerReceiver).
                    dependsOn(jobServer, jobServerExtras)
 
   lazy val jobServerExtrasSettings = revolverSettings ++ Assembly.settings ++ publishSettings ++ Seq(
@@ -86,7 +103,45 @@ object JobServerBuild extends Build {
     // Temporarily disable test for assembly builds so folks can package and get started.  Some tests
     // are flaky in extras esp involving paths.
     test in assembly := {},
-    exportJars := true
+    exportJars := false
+  )
+
+  lazy val jobServerSdkSettings = Assembly.settings ++ publishSettings ++ Seq(
+    libraryDependencies ++= scalajDeps
+//    // Extras packages up its own jar for testing itself
+//    test in Test <<= (test in Test).dependsOn(packageBin in Compile)
+//      .dependsOn(clean in Compile),
+//    fork in Test := true,
+//    // Temporarily disable test for assembly builds so folks can package and get started.  Some tests
+//    // are flaky in extras esp involving paths.
+//    test in assembly := {},
+//    exportJars := false
+  )
+
+  lazy val jobServerReceiverSettings = Assembly.settings ++ publishSettings ++ Seq(
+    libraryDependencies ++= zeromqDeps ++ logbackDeps,
+      // Extras packages up its own jar for testing itself
+      test in Test <<=(test in Test).dependsOn(packageBin in Compile)
+      .dependsOn(clean in Compile),
+    fork in Test := true,
+    console in Compile <<= Defaults.consoleTask(fullClasspath in Compile, console in Compile),
+    // Temporarily disable test for assembly builds so folks can package and get started.  Some tests
+    // are flaky in extras esp involving paths.
+    test in assembly := {},
+    exportJars := false
+  )
+
+  lazy val jobServerCommonSettings = Assembly.settings ++ publishSettings ++ Seq(
+    libraryDependencies ++= sparkDeps ++ sparkExtraDeps ++ slickDeps ++ json4sDeps
+      ++ zeromqDeps ++ akkaDeps ++ logbackDeps ++ hadoopDeps
+//    // Extras packages up its own jar for testing itself
+//    test in Test <<= (test in Test).dependsOn(packageBin in Compile)
+//      .dependsOn(clean in Compile),
+//    fork in Test := true,
+//    // Temporarily disable test for assembly builds so folks can package and get started.  Some tests
+//    // are flaky in extras esp involving paths.
+//    test in assembly := {},
+//    exportJars := false
   )
 
   lazy val jobServerTestJarSettings = Seq(
@@ -157,9 +212,9 @@ object JobServerBuild extends Build {
   )
 
   lazy val revolverSettings = Revolver.settings ++ Seq(
-    javaOptions in Revolver.reStart += jobServerLogging,
+    javaOptions in Revolver.reStart += jobServerLogbackLogging,
     // Give job server a bit more PermGen since it does classloading
-    javaOptions in Revolver.reStart += "-XX:MaxPermSize=256m",
+//    javaOptions in Revolver.reStart += "-XX:MaxPermSize=256m",
     javaOptions in Revolver.reStart += "-Djava.security.krb5.realm= -Djava.security.krb5.kdc=",
     // This lets us add Spark back to the classpath without assembly barfing
     fullClasspath in Revolver.reStart := (fullClasspath in Compile).value,
@@ -227,6 +282,7 @@ object JobServerBuild extends Build {
   )
 
   // This is here so we can easily switch back to Logback when Spark fixes its log4j dependency.
-  lazy val jobServerLogbackLogging = "-Dlogback.configurationFile=config/logback-local.xml"
+  lazy val jobServerLogbackLogging = "-Dlogback.configurationFile=/D:/Documents/OpenSource/spark-jobserver_avril23/job-server/config/logback-local.xml"
+//  lazy val jobServerLogbackLogging = "-Dlogback.configurationFile=config/logback-local.xml"
   lazy val jobServerLogging = "-Dlog4j.configuration=config/log4j-local.properties"
 }

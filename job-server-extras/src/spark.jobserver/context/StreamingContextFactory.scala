@@ -3,6 +3,7 @@ package spark.jobserver.context
 import com.typesafe.config.Config
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.{Milliseconds, StreamingContext}
+import spark.jobserver.common.context.SparkContextFactory
 import spark.jobserver.{ContextLike, SparkJobBase, SparkStreamingJob}
 
 class StreamingContextFactory extends SparkContextFactory {

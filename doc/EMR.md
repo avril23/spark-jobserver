@@ -81,7 +81,7 @@ InstanceCount=10,BidPrice=2.99,Name=sparkSlave,InstanceGroupType=CORE,InstanceTy
    jobserver {
      port = 8090
      jar-store-rootdir = /mnt/tmp/spark-jobserver/jars
-     jobdao = spark.jobserver.io.JobFileDAO
+     jobdao = spark.jobserver.common.io.JobFileDAO
      filedao {
        rootdir = /mnt/tmp/spark-jobserver/filedao/data
      }

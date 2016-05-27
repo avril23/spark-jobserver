@@ -1,10 +1,10 @@
 <configuration debug="true">
 
-  <logger name="ooyala.common" level="DEBUG" />
-  <logger name="spark.jobserver" level="DEBUG" />
+  <logger name="ooyala.common" level="INFO" />
+  <logger name="spark.jobserver" level="INFO" />
 
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <file>spark-jobserver.log</file>
+    <file>D:\\spark-jobserver.log</file>
 
     <!-- truncate the logfile every time we start the app -->
     <append>false</append>
@@ -15,7 +15,16 @@
 
   </appender>
 
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- encoders are assigned the type
+         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
   <root level="info">
     <appender-ref ref="FILE" />
+    <appender-ref ref="STDOUT" />
   </root>
 </configuration>

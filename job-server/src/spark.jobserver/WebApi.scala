@@ -11,12 +11,13 @@ import javax.net.ssl.SSLContext
 import ooyala.common.akka.web.{ WebService, CommonRoutes }
 import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
-import spark.jobserver.util.SparkJobUtils
-import spark.jobserver.util.SSLContextFactory
+import spark.jobserver.common.supervisor.ContextSupervisor
+import spark.jobserver.common.{JobManagerActor, JobInfoActor, CommonMessages}
+import spark.jobserver.common.utils.{SSLContextFactory, SparkJobUtils}
 import spark.jobserver.routes.DataRoutes
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.Try
-import spark.jobserver.io.JobInfo
+import spark.jobserver.common.io.JobInfo
 import spark.jobserver.auth._
 import spray.http.HttpResponse
 import spray.http.MediaTypes
@@ -227,7 +228,7 @@ class WebApi(system: ActorSystem,
    *     DELETE /contexts/<contextName> - stops a context and all jobs running in it
    */
   def contextRoutes: Route = pathPrefix("contexts") {
-    import ContextSupervisor._
+    import spark.jobserver.common.supervisor.ContextSupervisor._
     import collection.JavaConverters._
     // user authentication
     authenticate(authenticator) { authInfo =>
@@ -510,7 +511,7 @@ class WebApi(system: ActorSystem,
   private def getJobManagerForContext(context: Option[String],
                                       contextConfig: Config,
                                       classPath: String): Option[ActorRef] = {
-    import ContextSupervisor._
+    import spark.jobserver.common.supervisor.ContextSupervisor._
     val msg =
       if (context.isDefined) {
         GetContext(context.get)

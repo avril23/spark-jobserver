@@ -6,29 +6,33 @@ import akka.pattern.ask
 import com.typesafe.config.{ConfigValueFactory, Config, ConfigFactory}
 
 import java.io.File
-import spark.jobserver.io.{JobDAOActor, JobDAO, DataFileDAO}
+import spark.jobserver.common.{JobInfoActor, DataManagerActor}
+import spark.jobserver.common.io.{JobDAOActor, JobDAO, DataFileDAO}
 import org.slf4j.LoggerFactory
+import spark.jobserver.common.supervisor.{AkkaClusterSupervisorActor, LocalContextSupervisorActor, ContextSupervisor}
+import spark.jobserver.common.utils.SparkJobUtils
+import spark.jobserver.receiver._
 
 import scala.collection.JavaConverters._
-import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 /**
- * The Spark Job Server is a web service that allows users to submit and run Spark jobs, check status,
- * and view results.
- * It may offer other goodies in the future.
- * It only takes in one optional command line arg, a config file to override the default (and you can still
- * use -Dsetting=value to override)
- * -- Configuration --
- * {{{
- *   spark {
- *     master = "local"
- *     jobserver {
- *       port = 8090
- *     }
- *   }
- * }}}
- */
+  * The Spark Job Server is a web service that allows users to submit and run Spark jobs, check status,
+  * and view results.
+  * It may offer other goodies in the future.
+  * It only takes in one optional command line arg, a config file to override the default (and you can still
+  * use -Dsetting=value to override)
+  * -- Configuration --
+  * {{{
+  *   spark {
+  *     master = "local"
+  *     jobserver {
+  *       port = 8090
+  *     }
+  *   }
+  * }}}
+  */
 object JobServer {
   val logger = LoggerFactory.getLogger(getClass)
 
@@ -58,13 +62,17 @@ object JobServer {
       val jobDAO = ctor.newInstance(config).asInstanceOf[JobDAO]
       val daoActor = system.actorOf(Props(classOf[JobDAOActor], jobDAO), "dao-manager")
       val dataManager = system.actorOf(Props(classOf[DataManagerActor],
-          new DataFileDAO(config)), "data-manager")
+        new DataFileDAO(config)), "data-manager")
       val jarManager = system.actorOf(Props(classOf[JarManager], daoActor), "jar-manager")
       val contextPerJvm = config.getBoolean("spark.jobserver.context-per-jvm")
       val supervisor =
-        system.actorOf(Props(if (contextPerJvm) { classOf[AkkaClusterSupervisorActor] }
-                             else               { classOf[LocalContextSupervisorActor] }, daoActor),
-                       "context-supervisor")
+        system.actorOf(Props(if (contextPerJvm) {
+          classOf[AkkaClusterSupervisorActor]
+        }
+        else {
+          classOf[LocalContextSupervisorActor]
+        }, daoActor),
+          "context-supervisor")
       val jobInfo = system.actorOf(Props(classOf[JobInfoActor], jobDAO, supervisor), "job-info")
 
       // Add initial job JARs, if specified in configuration.
@@ -73,12 +81,23 @@ object JobServer {
       // Create initial contexts
       supervisor ! ContextSupervisor.AddContextsFromConfig
       new WebApi(system, config, port, jarManager, dataManager, supervisor, jobInfo).start()
+
+      // Initialize receiver.
+      val isEnableReceiver = config.getBoolean("spark.jobserver.receiver.isEnable")
+      if (isEnableReceiver) {
+        val cacheManager = new SparkCacheManager(config, supervisor)
+        val writer = system.actorOf(Props(classOf[CacheDataWriter], config, cacheManager), "job-server-receiver-writer")
+        val receiver = system.actorOf(Props(classOf[CacheDataReceiver], config, writer), "job-server-receiver")
+        val server = system.actorOf(Props(classOf[CacheDataQueryServer], config, cacheManager), "job-server-query-server")
+        new JobServerReceiver(receiver, server).start()
+      }
+
+      logger.info("The Job Server is running.")
     } catch {
       case e: Exception =>
         logger.error("Unable to start Spark JobServer: ", e)
         sys.exit(1)
     }
-
   }
 
   private def storeInitialJars(config: Config, jarManager: ActorRef): Unit = {
@@ -95,7 +114,7 @@ object JobServer {
           .toMap
 
       // Ensure that the jars exist
-      for(jarPath <- initialJars.values) {
+      for (jarPath <- initialJars.values) {
         val f = new java.io.File(jarPath)
         if (!f.exists) {
           val msg =
@@ -109,9 +128,9 @@ object JobServer {
         }
       }
 
-      val contextTimeout = util.SparkJobUtils.getContextTimeout(config)
+      val contextTimeout = SparkJobUtils.getContextTimeout(config)
       val future =
-        (jarManager ? StoreLocalJars(initialJars))(contextTimeout.seconds)
+        (jarManager ? StoreLocalJars(initialJars)) (contextTimeout.seconds)
 
       Await.result(future, contextTimeout.seconds) match {
         case InvalidJar => sys.error("Could not store initial job jars.")
@@ -129,6 +148,4 @@ object JobServer {
     }
     start(args, makeSupervisorSystem("JobServer")(_))
   }
-
-
 }

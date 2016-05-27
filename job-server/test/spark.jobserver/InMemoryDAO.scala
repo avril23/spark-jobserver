@@ -4,7 +4,7 @@ import com.typesafe.config.Config
 import java.io.{BufferedOutputStream, FileOutputStream}
 import org.joda.time.DateTime
 import scala.collection.mutable
-import spark.jobserver.io.{JobDAO, JobInfo}
+import spark.jobserver.common.io.{JobDAO, JobInfo}
 
 /**
  * In-memory DAO for easy unit testing

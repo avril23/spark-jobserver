@@ -4,8 +4,9 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.testkit.{ ImplicitSender, TestKit }
 import com.typesafe.config.{ Config, ConfigFactory, ConfigValueFactory }
 import akka.testkit.TestProbe
-import spark.jobserver.CommonMessages.{ JobErroredOut, JobResult }
-import spark.jobserver.io.JobDAOActor
+import spark.jobserver.common.CommonMessages
+import CommonMessages.{ JobErroredOut, JobResult }
+import spark.jobserver.common.io.JobDAOActor
 import collection.JavaConversions._
 
 class NamedObjectsJobSpec extends JobSpecBase(JobManagerSpec.getNewSystem) {

@@ -2,8 +2,9 @@ package spark.jobserver
 
 import akka.actor.Props
 import akka.testkit.TestProbe
-import spark.jobserver.CommonMessages.{JobErroredOut, JobResult}
-import spark.jobserver.io.JobDAOActor
+import spark.jobserver.common.CommonMessages
+import CommonMessages.{JobErroredOut, JobResult}
+import spark.jobserver.common.io.JobDAOActor
 
 class JobManagerActorSpec extends JobManagerSpec {
   import scala.concurrent.duration._

@@ -7,7 +7,8 @@ import org.apache.spark.storage.StorageLevel
 import org.scalatest.{ FunSpecLike, FunSpec, BeforeAndAfterAll, BeforeAndAfter }
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import spark.jobserver.CommonMessages.{ JobErroredOut, JobResult }
+import spark.jobserver.common.{JobServerNamedObjects, CommonMessages}
+import CommonMessages.{ JobErroredOut, JobResult }
 import java.util.concurrent.TimeoutException
 import scala.concurrent.duration._
 import org.apache.spark.rdd.RDD

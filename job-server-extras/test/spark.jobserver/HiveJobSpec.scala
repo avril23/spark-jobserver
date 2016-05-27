@@ -5,8 +5,9 @@ import org.apache.spark.sql.Row
 import org.apache.spark.{SparkContext, SparkConf}
 
 import org.apache.spark.sql.hive.test.TestHiveContext
+import spark.jobserver.common.CommonMessages
 import spark.jobserver.context.{HiveContextLike, HiveContextFactory}
-import spark.jobserver.io.{JobDAO, JobDAOActor}
+import spark.jobserver.common.io.{JobDAO, JobDAOActor}
 
 class TestHiveContextFactory extends HiveContextFactory {
   override protected def contextFactory(conf: SparkConf): C =

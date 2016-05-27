@@ -3,7 +3,8 @@ package spark.jobserver.routes
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
-import spark.jobserver.DataManagerActor._
+import spark.jobserver.common.DataManagerActor
+import DataManagerActor._
 import spray.routing.{ HttpService, Route }
 import spray.http.MediaTypes
 import spray.http.StatusCodes

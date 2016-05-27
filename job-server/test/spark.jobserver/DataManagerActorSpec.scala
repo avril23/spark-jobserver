@@ -5,7 +5,8 @@ import akka.testkit.{ TestKit, ImplicitSender }
 import org.scalatest.{ FunSpecLike, BeforeAndAfter, BeforeAndAfterAll, Matchers }
 import java.nio.file.Files
 
-import spark.jobserver.io.DataFileDAO
+import spark.jobserver.common.{CommonMessages, DataManagerActor}
+import spark.jobserver.common.io.DataFileDAO
 
 object DataManagerActorSpec {
   val system = ActorSystem("test")

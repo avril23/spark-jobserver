@@ -6,6 +6,8 @@ import org.scalatest.{ Matchers, FunSpec }
 import java.io.FileNotFoundException
 import javax.net.ssl.SSLContext
 
+import spark.jobserver.common.utils.SSLContextFactory
+
 class SSLContextFactorySpec extends FunSpec with Matchers {
   import collection.JavaConverters._
 

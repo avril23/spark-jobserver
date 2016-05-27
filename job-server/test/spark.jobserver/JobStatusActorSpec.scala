@@ -2,7 +2,8 @@ package spark.jobserver
 
 import akka.actor.{Props, PoisonPill, ActorRef, ActorSystem}
 import akka.testkit.{TestKit, ImplicitSender}
-import spark.jobserver.io.{JobDAOActor, JarInfo, JobInfo, JobDAO}
+import spark.jobserver.common.{JobStatusActor, CommonMessages, JobResultActor}
+import spark.jobserver.common.io.{JobDAOActor, JarInfo, JobInfo, JobDAO}
 import org.joda.time.DateTime
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{FunSpecLike, FunSpec, BeforeAndAfter, BeforeAndAfterAll}

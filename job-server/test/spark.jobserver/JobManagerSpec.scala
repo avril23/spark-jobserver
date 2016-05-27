@@ -4,8 +4,9 @@ import java.nio.file.Paths
 
 import com.typesafe.config.ConfigFactory
 import spark.jobserver.JobManagerActor.KillJob
+import spark.jobserver.common.CommonMessages
 import scala.collection.mutable
-import spark.jobserver.io.JobDAO
+import spark.jobserver.common.io.JobDAO
 
 object JobManagerSpec extends JobSpecConfig
 
