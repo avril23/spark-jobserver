@@ -140,7 +140,7 @@ class JobManagerActor(contextConfig: Config) extends InstrumentedActor {
           jarLoader.addURL(new URL(convertJarUriSparkToJava(jarUri)))
         }
         jobContext = createContextFromConfig()
-        sqlContext =  new SQLContext(jobContext.sparkContext)
+        sqlContext = new SQLContext(jobContext.sparkContext)
         sqlContext.setConf("spark.sql.inMemoryColumnarStorage.compressed", "true")
         sqlContext.setConf("spark.sql.inMemoryColumnarStorage.batchSize", "100000")
         sqlContext.setConf("", "")
@@ -199,13 +199,12 @@ class JobManagerActor(contextConfig: Config) extends InstrumentedActor {
             val schema = StructType(columns.map(c => StructField(c._1, convertToCatalystType(c._2), nullable = true)).toList)
             sqlContext.read.schema(schema).parquet(filePath)
         }
-        if(sqlContext.tableNames().contains(tableName)) {
+        if (sqlContext.tableNames().contains(tableName)) {
           sqlContext.uncacheTable(tableName)
         }
         df.persist(StorageLevel.MEMORY_ONLY)
         df.registerTempTable(tableName)
         logger.info(s"registered table $tableName with $filePath.")
-        sqlContext.tableNames().foreach(t => sqlContext.table(t).printSchema())
         sender ! Cached
       } catch {
         case t: Throwable =>
@@ -213,19 +212,24 @@ class JobManagerActor(contextConfig: Config) extends InstrumentedActor {
           sender ! CacheError(t)
       }
 
-//      df.printSchema()
-//      println("222222                  ")
-//      df.show(true)
-//      println("333333                  ")
-//      val query = """SELECT * FROM """ + tableName + """ WHERE startTime > '2014-11-19 19:50:00'"""
-//      sqlContext.sql(query).collect().foreach(println)
+    //      df.printSchema()
+    //      println("222222                  ")
+    //      df.show(true)
+    //      println("333333                  ")
+    //      val query = """SELECT * FROM """ + tableName + """ WHERE startTime > '2014-11-19 19:50:00'"""
+    //      sqlContext.sql(query).collect().foreach(println)
 
     case RetrieveCache(db: String, query: String) =>
       try {
         val df = sqlContext.sql(query)
         val headers = df.schema.fields.map(f => f.name -> f.dataType.typeName).toMap
         val rows = df.collect()
-        sender ! Retrieved(Option((headers, rows.map(r => r.mkString(", ")))))
+        sender ! Retrieved(Option((headers, rows.map(r => r.mkString("^%")))))
+      }
+      catch {
+        case t: Throwable =>
+          logger.error(s"retrieve cache failed. Db: $db, Query: $query.")
+          sender ! RetrieveError(t)
       }
   }
 
